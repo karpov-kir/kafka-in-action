@@ -1,0 +1,268 @@
+version: '3'
+name: kafka-in-action
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.7.0
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      KAFKA_OPTS: "-Dzookeeper.4lw.commands.whitelist=ruok"
+    healthcheck:
+      test: [
+        "CMD-SHELL", 
+        "echo ruok | nc 127.0.0.1 2181 || exit 1"
+      ]
+
+  broker1:
+    build:
+      context: .
+      dockerfile: Broker.Dockerfile
+    hostname: broker1
+    container_name: broker1
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "29091:29091"
+      - "29991:29991"
+      - "9091:9091"
+      - "9101:9101"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,SSL:SSL
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker1:29091,PLAINTEXT_HOST://localhost:9091,SSL://broker1:29991
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_SSL_KEYSTORE_FILENAME: 'kafka.server.keystore.jks'
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: 'broker-keystore-creds'
+      KAFKA_SSL_KEY_CREDENTIALS: 'broker-sslkey-creds'
+      KAFKA_SSL_TRUSTSTORE_FILENAME: 'kafka.server.truststore.jks'
+      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: 'broker-truststore-creds'
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: " "
+      KAFKA_SECURITY_INTER_BROKER_PROTOCOL: SSL
+      KAFKA_SSL_CLIENT_AUTH: requested
+    volumes:
+      - ../chapters:/kafka-in-action
+      - ./certs:/etc/kafka/secrets
+    healthcheck:
+      test: [
+        "CMD-SHELL", 
+        "unset KAFKA_JMX_OPTS && unset JMX_PORT && kafka-topics --bootstrap-server broker1:29091 --list || exit 1"
+      ]
+
+  broker2:
+    build:
+      context: .
+      dockerfile: Broker.Dockerfile
+    hostname: broker2
+    container_name: broker2
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "29092:29092"
+      - "29992:29992"
+      - "9092:9092"
+      - "9102:9102"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,SSL:SSL
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker2:29092,PLAINTEXT_HOST://localhost:9092,SSL://broker2:29992
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9102
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_SSL_KEYSTORE_FILENAME: 'kafka.server.keystore.jks'
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: 'broker-keystore-creds'
+      KAFKA_SSL_KEY_CREDENTIALS: 'broker-sslkey-creds'
+      KAFKA_SSL_TRUSTSTORE_FILENAME: 'kafka.server.truststore.jks'
+      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: 'broker-truststore-creds'
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: " "
+      KAFKA_SECURITY_INTER_BROKER_PROTOCOL: SSL
+      KAFKA_SSL_CLIENT_AUTH: requested
+    volumes:
+      - ../chapters:/kafka-in-action
+      - ./certs:/etc/kafka/secrets
+    healthcheck:
+      test: [
+        "CMD-SHELL", 
+        "unset KAFKA_JMX_OPTS && unset JMX_PORT && kafka-topics --bootstrap-server broker2:29092 --list || exit 1"
+      ]
+
+  broker3:
+    build:
+      context: .
+      dockerfile: Broker.Dockerfile
+    hostname: broker3
+    container_name: broker3
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "29093:29093"
+      - "29993:29993"
+      - "9093:9093"
+      - "9103:9103"
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,SSL:SSL
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker3:29093,PLAINTEXT_HOST://localhost:9093,SSL://broker3:29993
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9103
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_SSL_KEYSTORE_FILENAME: 'kafka.server.keystore.jks'
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: 'broker-keystore-creds'
+      KAFKA_SSL_KEY_CREDENTIALS: 'broker-sslkey-creds'
+      KAFKA_SSL_TRUSTSTORE_FILENAME: 'kafka.server.truststore.jks'
+      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: 'broker-truststore-creds'
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: " "
+      KAFKA_SECURITY_INTER_BROKER_PROTOCOL: SSL
+      KAFKA_SSL_CLIENT_AUTH: requested
+    volumes:
+      - ../chapters:/kafka-in-action
+      - ./certs:/etc/kafka/secrets
+    healthcheck:
+      test: [
+        "CMD-SHELL", 
+        "unset KAFKA_JMX_OPTS && unset JMX_PORT && kafka-topics --bootstrap-server broker3:29093 --list || exit 1"
+      ]
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.7.0
+    hostname: schema-registry
+    container_name: schema-registry
+    depends_on:
+      broker1:
+        condition: service_healthy
+      broker2:
+        condition: service_healthy
+      broker3:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker1:29091'
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+
+  ksqldb-server:
+    image: confluentinc/ksqldb-server:0.29.0
+    hostname: ksqldb-server
+    container_name: ksqldb-server
+    depends_on:
+      broker1:
+        condition: service_healthy
+      broker2:
+        condition: service_healthy
+      broker3:
+        condition: service_healthy
+      schema-registry:
+        condition: service_started
+    ports:
+      - "8088:8088"
+    environment:
+      KSQL_CONFIG_DIR: "/etc/ksqldb"
+      KSQL_KSQL_EXTENSION_DIR: "/etc/ksqldb/ext/"
+      KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksqldb/log4j.properties"
+      KSQL_BOOTSTRAP_SERVERS: "broker1:29091"
+      KSQL_HOST_NAME: ksqldb-server
+      KSQL_LISTENERS: "http://0.0.0.0:8088"
+      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
+      KSQL_CACHE_MAX_BYTES_BUFFERING: 0
+      KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+
+  ksqldb-cli:
+    image: confluentinc/ksqldb-cli:0.29.0
+    container_name: ksqldb-cli
+    depends_on:
+      broker1:
+        condition: service_healthy
+      ksqldb-server:
+        condition: service_started
+    entrypoint: /bin/sh
+    tty: true
+    environment:
+      KSQL_CONFIG_DIR: "/etc/ksqldb"
+    
+  kafka-exporter:
+    depends_on:
+      broker1:
+        condition: service_healthy
+      broker2:
+        condition: service_healthy
+      broker3:
+        condition: service_healthy
+    image: danielqsj/kafka-exporter:v1.8.0
+    command: [
+      --kafka.server=broker1:29091,
+      --kafka.server=broker2:29092,
+      --kafka.server=broker3:29093,
+      --use.consumelag.zookeeper,
+      --zookeeper.server=zookeeper:2181
+    ]
+    ports:
+      - 9308:9308
+  
+  rest-proxy:
+    image: confluentinc/cp-kafka-rest:7.7.0
+    hostname: rest-proxy
+    container_name: rest-proxy
+    depends_on:
+      broker1:
+        condition: service_healthy
+      broker2:
+        condition: service_healthy
+      broker3:
+        condition: service_healthy
+      schema-registry:
+        condition: service_started
+    ports:
+      - 8086:8086
+    environment:
+      KAFKA_REST_HOST_NAME: rest-proxy
+      KAFKA_REST_BOOTSTRAP_SERVERS: 'broker1:29091,broker2:29092,broker3:29093'
+      KAFKA_REST_LISTENERS: http://0.0.0.0:8086
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      kafka-exporter:
+        condition: service_started
+  
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: grafana
+    ports:
+      - 3000:3000
+    depends_on:
+      prometheus:
+        condition: service_started
+    volumes:
+      - ./graphana/provisioning:/etc/grafana/provisioning
+      - grafana-storage:/var/lib/grafana
+      - ./graphana/dashboards/kafka-exporter.json:/usr/lib/dashboards/kafka-exporter/dashboard.json
+
+volumes:
+  grafana-storage:

@@ -1,0 +1,9 @@
+apiVersion: 1
+
+providers:
+  - name: 'Automatically loaded dashboards'
+    updateIntervalSeconds: 5
+    allowUiUpdates: true
+    options:
+      path: /usr/lib/dashboards
+      foldersFromFilesStructure: true
